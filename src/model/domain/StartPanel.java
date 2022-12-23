@@ -3,11 +3,10 @@ package model.domain;
 import util.Constant;
 
 import javax.swing.*;
-import javax.swing.border.LineBorder;
 import java.awt.*;
 
 public class StartPanel extends JPanel {
-    ImageIcon backGround = new ImageIcon(getClass().getResource("/image/sej.jpeg"));
+    ImageIcon backGround = new ImageIcon(getClass().getResource("/sourceFile/sej.jpeg"));
     JLabel label1, label2, label3, labelSpace;
     private int w, h;
     private Image image;

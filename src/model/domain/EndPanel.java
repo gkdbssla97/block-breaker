@@ -6,7 +6,7 @@ import javax.swing.*;
 import java.awt.*;
 
 public class EndPanel extends JPanel {
-    ImageIcon backGround = new ImageIcon(getClass().getResource("/image/SejongUniv.jpeg"));
+    ImageIcon backGround = new ImageIcon(getClass().getResource("/sourceFile/SejongUniv.jpeg"));
     JLabel label1, label2, label3, label4;
     private int w, h;
     private Image image;

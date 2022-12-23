@@ -1,5 +1,6 @@
 package model.domain;
 
+import model.audio.GameAudio;
 import model.service.StageService;
 import util.Constant;
 
@@ -14,6 +15,8 @@ import static util.Constant.*;
 
 public class MyFrame extends JFrame {
 
+    //audio
+    static GameAudio blockCollision = new GameAudio();
     //panel
     static StartPanel startPanel = new StartPanel();
     static PlayPanel playPanel = new PlayPanel(STAGE1);
@@ -42,7 +45,6 @@ public class MyFrame extends JFrame {
         setLocation(400, 200);
         setLayout(new BorderLayout());
 
-
 //        startPanel.setLayout(null);
         startPanel.setBounds(0, 0, 600, 400);
         playPanel.setVisible(false);
@@ -53,7 +55,7 @@ public class MyFrame extends JFrame {
         add(endPanel);
         setVisible(true);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
+        GameAudio.gameStartAudio();
         addKeyListener(new KeyListener() {
             @Override
             public void keyTyped(KeyEvent e) {
@@ -370,6 +372,7 @@ public class MyFrame extends JFrame {
                                 // block left collision
                                 dir = 2;
                             }
+                            blockCollision.blockCollisionAudio();
                             block.isHidden = true;
                             if (block.color == 0) {
                                 SCORE += 10;
@@ -392,6 +395,7 @@ public class MyFrame extends JFrame {
                                 // block left collision
                                 dir = 2;
                             }
+                            blockCollision.blockCollisionAudio();
                             block.isHidden = true;
                             if (block.color == 0) {
                                 SCORE += 10;
@@ -414,6 +418,7 @@ public class MyFrame extends JFrame {
                                 // block right collision
                                 dir = 0;
                             }
+                            blockCollision.blockCollisionAudio();
                             block.isHidden = true;
                             if (block.color == 0) {
                                 SCORE += 10;
@@ -436,6 +441,7 @@ public class MyFrame extends JFrame {
                                 // block right collision
                                 dir = 1;
                             }
+                            blockCollision.blockCollisionAudio();
                             block.isHidden = true;
                             if (block.color == 0) {
                                 SCORE += 10;
