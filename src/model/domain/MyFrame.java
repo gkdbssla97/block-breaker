@@ -22,6 +22,8 @@ public class MyFrame extends JFrame {
     static PlayPanel playPanel = new PlayPanel(STAGE1);
     static PlayPanel nextGamePanel;
     static EndPanel endPanel = new EndPanel();
+    static GameClearPanel clearPanel = new GameClearPanel();
+
     //variable
 
     static Timer timer = null;
@@ -34,11 +36,11 @@ public class MyFrame extends JFrame {
     static int ballSpeed = 3;
     static boolean isGameFinished = false;
     static boolean isGameOver = false;
+    static boolean duplicateBall = false;
     static int panelStatus = 0; // 0: startPanel, 1: playPanel, 2: endPanel
-    static LinkedList<Ball> balls = new LinkedList<Ball>();
-
+    static Thread t;
+    LinkedList<MObject> balls = playPanel.getBalls();
     public MyFrame() throws HeadlessException {
-
         setTitle("#HomeWork5");
         setSize(600, 600);
         setResizable(false);
@@ -56,6 +58,7 @@ public class MyFrame extends JFrame {
         setVisible(true);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         GameAudio.gameStartAudio();
+        t = new Thread();
         addKeyListener(new KeyListener() {
             @Override
             public void keyTyped(KeyEvent e) {
@@ -69,7 +72,8 @@ public class MyFrame extends JFrame {
                     startPanel.setVisible(false);
                     playPanel.setVisible(true);
                     endPanel.setVisible(false);
-                    blocks = initApplication();
+                    if(LEVEL == 1)
+                        blocks = initApplication();
 
                     setKeyListener();
                     if (LEVEL == 1) {
@@ -77,7 +81,8 @@ public class MyFrame extends JFrame {
                     } else if (LEVEL == 2) {
 //                        timer.start();
                         startTime(nextGamePanel);
-                    }
+                    } else if (LEVEL == 3)
+                        endPanel.setVisible(true);
                 }
             }
 
@@ -87,7 +92,6 @@ public class MyFrame extends JFrame {
             }
         });
     }
-
     public Block[][] initApplication() {
         StageService stageByLevel = StageService.findStageByLevel(LEVEL);
         blocks = new Block[stageByLevel.getRows()][stageByLevel.getCols()];
@@ -143,69 +147,101 @@ public class MyFrame extends JFrame {
         int iValue = rand.nextInt(2);
         return iValue;
     }
-
-    public void startTime(PlayPanel playPanel) {
-        StageService stageByLevel = StageService.findStageByLevel(Constant.LEVEL);
-        timer = new Timer(15, new ActionListener() {
+    public void startTime(PlayPanel playpanel) {
+        t = new Thread(new Runnable() {
             @Override
-            public void actionPerformed(ActionEvent e) {
-                movement();
-                checkCollision(); // Bar, Wall
-                checkCollisionBlock(Constant.LEVEL); // Blocks
+            public void run() {
+                while (true) {
+                    try {
+                        Thread.sleep(15);
+                    } catch (InterruptedException e) {
+                    }
+                    StageService stageByLevel = StageService.findStageByLevel(Constant.LEVEL);
+                    if(duplicateBall) {
+                        System.out.println("SMASHED!");
+                        balls.add(new Ball(ball.x, ball.y));
+                        balls.add(new Ball(ball.x, ball.y));
+                        balls.add(new Ball(ball.x, ball.y));
+
+                        movementDupBall();
+                        duplicateBall = false;
+                        repaint();
+                    }
+                    movement();
+                    checkCollision(); // Bar, Wall
+                    if(LEVEL <= 2)
+                        checkCollisionBlock(Constant.LEVEL); // Blocks
 //                checkCollisionBlockDupl(LEVEL);
 //                playPanel.repaint(); //Redraw
+                    if(LEVEL <= 3)
+                        isGameFinished(stageByLevel);
 
-                isGameFinished(stageByLevel);
-                if (isGameFinished && LEVEL <= 2) {
-                    playPanel.setVisible(false);
-                    isGameFinished = false;
-                    StageService nextStage = StageService.findStageByLevel(Constant.LEVEL);
-                    System.out.println("LV: " + LEVEL);
-                    ball = new Ball(bar.x + 5, bar.y);
+                    if (isGameFinished && LEVEL <= 2) {
+                        playpanel.setVisible(false);
+                        isGameFinished = false;
+                        StageService nextStage = StageService.findStageByLevel(Constant.LEVEL);
+                        System.out.println("LV: " + LEVEL);
+                        ball = new Ball(bar.x + 5, bar.y);
 //                    setKeyListener();
-                    nextGamePanel = new PlayPanel(nextStage);
-                    add(nextGamePanel);
+                        nextGamePanel = new PlayPanel(nextStage);
+                        add(nextGamePanel);
 
-                    nextGamePanel.setVisible(true);
+                        nextGamePanel.setVisible(true);
 
-                    nextGamePanel.repaint();
-                    blocks = new Block[nextStage.getRows()][nextStage.getCols()];
-                    blocks = initApplication();
-                    isGameFinished = false;
+                        nextGamePanel.repaint();
+                        blocks = new Block[nextStage.getRows()][nextStage.getCols()];
+                        blocks = initApplication();
+                        isGameFinished = false;
+                    }
+//                    if (isGameOver && LEVEL == 3) {
+//                        initEndPanel();
+//                        endPanel.setVisible(true);
+//                        repaint();
+//                    }
+                    repaint();
                 }
-                repaint();
-
             }
         });
-        if (isGameOver)
-            initEndPanel();
-        timer.start();
+        t.start();
     }
 
     public void isGameFinished(StageService stageService) {
         int count = 0;
-        for (int i = 0; i < stageService.getRows(); i++) {
-            for (int j = 0; j < stageService.getCols(); j++) {
-                Block block = blocks[i][j];
-                if (block.isHidden) {
-                    count++;
-                    System.out.println("?: " + count);
+        if (LEVEL <= 2) {
+            for (int i = 0; i < stageService.getRows(); i++) {
+                for (int j = 0; j < stageService.getCols(); j++) {
+                    Block block = blocks[i][j];
+                    if (block.isHidden) {
+                        count++;
+                        System.out.println("?: " + count);
+                    } else System.out.println("umm...");
                 }
             }
         }
-        if (count == BLOCK_ROWS * BLOCK_COLS || count == 3) {
+        if (count == stageService.getCols() * stageService.getRows()) {
             LEVEL++;
             isGameFinished = true;
 //                timer.stop();
 //                collisionCount = 0;
 //                return true;
         }
-        if (LEVEL == 3) {
-//            timer.stop();
-            isGameFinished = true;
+        if (isGameOver) {
+            initEndPanel();
+            add(endPanel);
+            playPanel.setVisible(false);
             nextGamePanel.setVisible(false);
             endPanel.setVisible(true);
-            add(endPanel);
+            t.interrupt();
+        }
+        if (LEVEL == 3) {
+            LEVEL = 0;
+//            timer.stop();
+            initClearPanel();
+            add(clearPanel);
+            isGameFinished = true;
+            nextGamePanel.setVisible(false);
+            clearPanel.setVisible(true);
+            t.interrupt();
         }
     }
 
@@ -231,19 +267,22 @@ public class MyFrame extends JFrame {
     }
 
     public void movementDupBall() {
-        for (Ball ball : balls) {
-            if (dir == 0) { // 0: Up-Right
-                ball.x += ballSpeed;
-                ball.y -= ballSpeed;
-            } else if (dir == 1) { // 1: Down-right
-                ball.x += ballSpeed;
-                ball.y += ballSpeed;
-            } else if (dir == 2) { // 2: Up-Left
-                ball.x -= ballSpeed;
-                ball.y -= ballSpeed;
-            } else if (dir == 3) { // 3: Down-Left
-                ball.x -= ballSpeed;
-                ball.y += ballSpeed;
+        for (var b : balls) {
+            if (b instanceof Ball) {
+                Ball ball = (Ball) b;
+                if (dir == 0) { // 0: Up-Right
+                    ball.x += ballSpeed;
+                    ball.y -= ballSpeed;
+                } else if (dir == 1) { // 1: Down-right
+                    ball.x += ballSpeed;
+                    ball.y += ballSpeed;
+                } else if (dir == 2) { // 2: Up-Left
+                    ball.x -= ballSpeed;
+                    ball.y -= ballSpeed;
+                } else if (dir == 3) { // 3: Down-Left
+                    ball.x -= ballSpeed;
+                    ball.y += ballSpeed;
+                }
             }
         }
     }
@@ -263,14 +302,17 @@ public class MyFrame extends JFrame {
             }
         } if (dir == 1) { // 1: Down-right
             // Wall
-            if (ball.y > CANVAS_HEIGHT - 2 * BALL_HEIGHT) { // 아랫벽
+            if (ball.y > CANVAS_HEIGHT - ball.height) { // 아랫벽
                 //Game Over
 //                isGameFinished = true;
                 // 새로운 패널 가져오기
                 isGameOver = true;
                 if (HIGH_SCORE <= SCORE) {
                     HIGH_SCORE = SCORE;
-                }
+                } t.interrupt();
+                playPanel.setVisible(false);
+//                nextGamePanel.setVisible(false);
+//                endPanel.setVisible(true);
                 addKeyListener(new KeyAdapter() {
                     @Override
                     public void keyPressed(KeyEvent e) {
@@ -313,8 +355,8 @@ public class MyFrame extends JFrame {
                 isGameOver = true;
                 if (HIGH_SCORE <= SCORE) {
                     HIGH_SCORE = SCORE;
-                }
-
+                } t.interrupt();
+//                endPanel.setVisible(true);
                 addKeyListener(new KeyAdapter() {
                     @Override
                     public void keyPressed(KeyEvent e) {
@@ -324,6 +366,7 @@ public class MyFrame extends JFrame {
                             endPanel.setVisible(false);
                             startPanel.setVisible(true);
                             isGameOver = false;
+                            setKeyListener();
                             repaint();
                         }
                     }
@@ -349,9 +392,16 @@ public class MyFrame extends JFrame {
         endPanel.initLabel2(HIGH_SCORE);
         endPanel.initLabel3(SCORE);
         endPanel.initLabel4();
-        playPanel.setVisible(false);
+//        playPanel.setVisible(false);
         endPanel.setVisible(true);
-        LEVEL = 1;
+    }
+    private void initClearPanel() {
+        clearPanel.initLabel1();
+        clearPanel.initLabel2(HIGH_SCORE);
+        clearPanel.initLabel3(SCORE);
+        clearPanel.initLabel4();
+//        playPanel.setVisible(false);
+        clearPanel.setVisible(true);
     }
 
     public void checkCollisionBlock(int level) {
@@ -378,10 +428,7 @@ public class MyFrame extends JFrame {
                                 SCORE += 10;
                             } else if (block.color == 1) {
                                 SCORE += 20;
-                                balls.add(new Ball(ball.x, ball.y));
-                                balls.add(new Ball(ball.x, ball.y));
-                                balls.add(new Ball(ball.x, ball.y));
-                                movementDupBall();
+                                duplicateBall = true;
                             }
                         }
                     } else if (dir == 1) { // 1: Down-right
@@ -401,10 +448,7 @@ public class MyFrame extends JFrame {
                                 SCORE += 10;
                             } else if (block.color == 1) {
                                 SCORE += 20;
-                                balls.add(new Ball(ball.x, ball.y));
-                                balls.add(new Ball(ball.x, ball.y));
-                                balls.add(new Ball(ball.x, ball.y));
-                                movementDupBall();
+                                duplicateBall = true;
                             }
                         }
                     } else if (dir == 2) { // 2: Up-Left
@@ -424,10 +468,7 @@ public class MyFrame extends JFrame {
                                 SCORE += 10;
                             } else if (block.color == 1) {
                                 SCORE += 20;
-                                balls.add(new Ball(ball.x, ball.y));
-                                balls.add(new Ball(ball.x, ball.y));
-                                balls.add(new Ball(ball.x, ball.y));
-                                movementDupBall();
+                                duplicateBall = true;
                             }
                         }
                     } else if (dir == 3) {// 3: Down-Left
@@ -447,10 +488,7 @@ public class MyFrame extends JFrame {
                                 SCORE += 10;
                             } else if (block.color == 1) {
                                 SCORE += 20;
-                                balls.add(new Ball(ball.x, ball.y));
-                                balls.add(new Ball(ball.x, ball.y));
-                                balls.add(new Ball(ball.x, ball.y));
-                                movementDupBall();
+                                duplicateBall = true;
                             }
                         }
                     }

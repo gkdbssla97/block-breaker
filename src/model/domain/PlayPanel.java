@@ -4,6 +4,7 @@ import model.service.StageService;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.LinkedList;
 
 import static util.Constant.*;
 
@@ -14,6 +15,7 @@ public class PlayPanel extends JPanel { // CANVAS for Drawing
     public int blockHeight;
     public StageService stageService;
 
+    LinkedList<MObject> balls = new LinkedList<MObject>();
     public PlayPanel(StageService stageService) {
         this.stageService = stageService;
         this.setSize(CANVAS_WIDTH, CANVAS_HEIGHT);
@@ -56,5 +58,19 @@ public class PlayPanel extends JPanel { // CANVAS for Drawing
             graphics2D.setColor(new Color(110, 80, 60));
             graphics2D.fillRect(MyFrame.bar.x, MyFrame.bar.y, BAR_WIDTH, BALL_HEIGHT);
         }
+    }
+
+    @Override
+    public void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        for (var o : balls) {
+            if (o instanceof Ball) {
+                o.draw(g);
+            }
+        }
+    }
+
+    public LinkedList<MObject> getBalls() {
+        return balls;
     }
 }
