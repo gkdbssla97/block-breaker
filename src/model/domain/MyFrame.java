@@ -40,6 +40,7 @@ public class MyFrame extends JFrame {
     static int panelStatus = 0; // 0: startPanel, 1: playPanel, 2: endPanel
     static Thread t;
     LinkedList<MObject> balls = playPanel.getBalls();
+
     public MyFrame() throws HeadlessException {
         setTitle("#HomeWork5");
         setSize(600, 600);
@@ -47,7 +48,6 @@ public class MyFrame extends JFrame {
         setLocation(400, 200);
         setLayout(new BorderLayout());
 
-//        startPanel.setLayout(null);
         startPanel.setBounds(0, 0, 600, 400);
         playPanel.setVisible(false);
         endPanel.setVisible(false);
@@ -72,7 +72,7 @@ public class MyFrame extends JFrame {
                     startPanel.setVisible(false);
                     playPanel.setVisible(true);
                     endPanel.setVisible(false);
-                    if(LEVEL == 1)
+                    if (LEVEL == 1)
                         blocks = initApplication();
 
                     setKeyListener();
@@ -92,6 +92,7 @@ public class MyFrame extends JFrame {
             }
         });
     }
+
     public Block[][] initApplication() {
         StageService stageByLevel = StageService.findStageByLevel(LEVEL);
         blocks = new Block[stageByLevel.getRows()][stageByLevel.getCols()];
@@ -147,6 +148,7 @@ public class MyFrame extends JFrame {
         int iValue = rand.nextInt(2);
         return iValue;
     }
+
     public void startTime(PlayPanel playpanel) {
         t = new Thread(new Runnable() {
             @Override
@@ -157,7 +159,7 @@ public class MyFrame extends JFrame {
                     } catch (InterruptedException e) {
                     }
                     StageService stageByLevel = StageService.findStageByLevel(Constant.LEVEL);
-                    if(duplicateBall) {
+                    if (duplicateBall) {
                         System.out.println("SMASHED!");
                         balls.add(new Ball(ball.x, ball.y));
                         balls.add(new Ball(ball.x, ball.y));
@@ -169,20 +171,17 @@ public class MyFrame extends JFrame {
                     }
                     movement();
                     checkCollision(); // Bar, Wall
-                    if(LEVEL <= 2)
+                    if (LEVEL <= 2)
                         checkCollisionBlock(Constant.LEVEL); // Blocks
-//                checkCollisionBlockDupl(LEVEL);
-//                playPanel.repaint(); //Redraw
-                    if(LEVEL <= 3)
+                    if (LEVEL <= 3)
                         isGameFinished(stageByLevel);
 
                     if (isGameFinished && LEVEL <= 2) {
                         playpanel.setVisible(false);
                         isGameFinished = false;
                         StageService nextStage = StageService.findStageByLevel(Constant.LEVEL);
-                        System.out.println("LV: " + LEVEL);
+
                         ball = new Ball(bar.x + 5, bar.y);
-//                    setKeyListener();
                         nextGamePanel = new PlayPanel(nextStage);
                         add(nextGamePanel);
 
@@ -193,11 +192,6 @@ public class MyFrame extends JFrame {
                         blocks = initApplication();
                         isGameFinished = false;
                     }
-//                    if (isGameOver && LEVEL == 3) {
-//                        initEndPanel();
-//                        endPanel.setVisible(true);
-//                        repaint();
-//                    }
                     repaint();
                 }
             }
@@ -213,17 +207,13 @@ public class MyFrame extends JFrame {
                     Block block = blocks[i][j];
                     if (block.isHidden) {
                         count++;
-                        System.out.println("?: " + count);
-                    } else System.out.println("umm...");
+                    }
                 }
             }
         }
         if (count == stageService.getCols() * stageService.getRows()) {
             LEVEL++;
             isGameFinished = true;
-//                timer.stop();
-//                collisionCount = 0;
-//                return true;
         }
         if (isGameOver) {
             initEndPanel();
@@ -235,7 +225,6 @@ public class MyFrame extends JFrame {
         }
         if (LEVEL == 3) {
             LEVEL = 0;
-//            timer.stop();
             initClearPanel();
             add(clearPanel);
             isGameFinished = true;
@@ -300,7 +289,8 @@ public class MyFrame extends JFrame {
             if (ball.x >= CANVAS_WIDTH - BALL_WIDTH) { // 오른벽
                 dir = 2;
             }
-        } if (dir == 1) { // 1: Down-right
+        }
+        if (dir == 1) { // 1: Down-right
             // Wall
             if (ball.y > CANVAS_HEIGHT - ball.height) { // 아랫벽
                 //Game Over
@@ -309,14 +299,13 @@ public class MyFrame extends JFrame {
                 isGameOver = true;
                 if (HIGH_SCORE <= SCORE) {
                     HIGH_SCORE = SCORE;
-                } t.interrupt();
+                }
+                t.interrupt();
                 playPanel.setVisible(false);
-//                nextGamePanel.setVisible(false);
-//                endPanel.setVisible(true);
+
                 addKeyListener(new KeyAdapter() {
                     @Override
                     public void keyPressed(KeyEvent e) {
-//                            super.keyPressed(e);
                         if (e.getKeyCode() == KeyEvent.VK_SPACE && panelStatus == 2) {
                             panelStatus = 0;
                             endPanel.setVisible(false);
@@ -338,7 +327,8 @@ public class MyFrame extends JFrame {
                     dir = 0;
                 }
             }
-        } if (dir == 2) { // 2: Up-Left
+        }
+        if (dir == 2) { // 2: Up-Left
             // Wall
             if (ball.y < 0) { // 윗벽
                 dir = 3;
@@ -347,15 +337,16 @@ public class MyFrame extends JFrame {
                 dir = 0;
             }
             // Bar
-        } if (dir == 3) { // 3: Down-Left
+        }
+        if (dir == 3) { // 3: Down-Left
             if (ball.y > CANVAS_HEIGHT - bar.height) { // 아랫벽
                 //Game Over
-//                isGameFinished = true;
                 // 새로운 패널 가져오기
                 isGameOver = true;
                 if (HIGH_SCORE <= SCORE) {
                     HIGH_SCORE = SCORE;
-                } t.interrupt();
+                }
+                t.interrupt();
 //                endPanel.setVisible(true);
                 addKeyListener(new KeyAdapter() {
                     @Override
@@ -395,6 +386,7 @@ public class MyFrame extends JFrame {
 //        playPanel.setVisible(false);
         endPanel.setVisible(true);
     }
+
     private void initClearPanel() {
         clearPanel.initLabel1();
         clearPanel.initLabel2(HIGH_SCORE);
@@ -496,106 +488,110 @@ public class MyFrame extends JFrame {
             }
         }
     }
-//    public void checkCollisionBlockDupl(int level) {
-//        for (Ball ball : balls) {
-//            StageService stageByLevel = StageService.findStageByLevel(level);
-//            //0: Up-Right 1: Down-right 2: Up-Left 3: Down-Left
-//            for (int i = 0; i < stageByLevel.getRows(); i++) {
-//                for (int j = 0; j < stageByLevel.getCols(); j++) {
-//                    Block block = blocks[i][j];
-//                    if (!block.isHidden) {
-//                        if (dir == 0) {// 0: Up-Right
-//                            if (isCollidedBallAndBar(new Rectangle(ball.x, ball.y, ball.width, ball.height),
-//                                    new Rectangle(block.x, block.y, block.width, block.height))) {
-//                                if (ball.x > block.x + BLOCK_GAP &&
-//                                        ball.getRightCenter().x <= block.x + block.width - BLOCK_GAP) {
-//                                    // block bottom collision
-//                                    dir = 1;
-//                                } else {
-//                                    // block left collision
-//                                    dir = 2;
-//                                }
-//                                block.isHidden = true;
-//                                if (block.color == 0) {
-//                                    SCORE += 10;
-//                                } else if (block.color == 1) {
-//                                    SCORE += 20;
-//                                    balls.add(new Ball(ball.x, ball.y));
-//                                    balls.add(new Ball(ball.x, ball.y));
-//                                    balls.add(new Ball(ball.x, ball.y));
-//                                    movementDupBall();
-//                                }
-//                            }
-//                        } else if (dir == 1) { // 1: Down-right
-//                            if (isCollidedBallAndBar(new Rectangle(ball.x, ball.y, ball.width, ball.height),
-//                                    new Rectangle(block.x, block.y, block.width, block.height))) {
-//                                if (ball.x > block.x + BLOCK_GAP &&
-//                                        ball.getRightCenter().x <= block.x + block.width - BLOCK_GAP) {
-//                                    // block top collision
-//                                    dir = 0;
-//                                } else {
-//                                    // block left collision
-//                                    dir = 2;
-//                                }
-//                                block.isHidden = true;
-//                                if (block.color == 0) {
-//                                    SCORE += 10;
-//                                } else if (block.color == 1) {
-//                                    SCORE += 20;
-//                                    balls.add(new Ball(ball.x, ball.y));
-//                                    balls.add(new Ball(ball.x, ball.y));
-//                                    balls.add(new Ball(ball.x, ball.y));
-//                                    movementDupBall();
-//                                }
-//                            }
-//                        } else if (dir == 2) { // 2: Up-Left
-//                            if (isCollidedBallAndBar(new Rectangle(ball.x, ball.y, ball.width, ball.height),
-//                                    new Rectangle(block.x, block.y, block.width, block.height))) {
-//                                if (ball.x > block.x + BLOCK_GAP &&
-//                                        ball.getRightCenter().x <= block.x + block.width - BLOCK_GAP) {
-//                                    // block bottom collision
-//                                    dir = 3;
-//                                } else {
-//                                    // block right collision
-//                                    dir = 0;
-//                                }
-//                                block.isHidden = true;
-//                                if (block.color == 0) {
-//                                    SCORE += 10;
-//                                } else if (block.color == 1) {
-//                                    SCORE += 20;
-//                                    balls.add(new Ball(ball.x, ball.y));
-//                                    balls.add(new Ball(ball.x, ball.y));
-//                                    balls.add(new Ball(ball.x, ball.y));
-//                                    movementDupBall();
-//                                }
-//                            }
-//                        } else if (dir == 3) {// 3: Down-Left
-//                            if (isCollidedBallAndBar(new Rectangle(ball.x, ball.y, ball.width, ball.height),
-//                                    new Rectangle(block.x, block.y, block.width, block.height))) {
-//                                if (ball.x > block.x + BLOCK_GAP &&
-//                                        ball.getRightCenter().x <= block.x + block.width - BLOCK_GAP) {
-//                                    // block top collision
-//                                    dir = 2;
-//                                } else {
-//                                    // block right collision
-//                                    dir = 1;
-//                                }
-//                                block.isHidden = true;
-//                                if (block.color == 0) {
-//                                    SCORE += 10;
-//                                } else if (block.color == 1) {
-//                                    SCORE += 20;
-//                                    balls.add(new Ball(ball.x, ball.y));
-//                                    balls.add(new Ball(ball.x, ball.y));
-//                                    balls.add(new Ball(ball.x, ball.y));
-//                                    movementDupBall();
-//                                }
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//    }
+
+    public void checkCollisionBlockDupl(int level) {
+        for (var b : balls) {
+            if (b instanceof Ball) {
+                Ball ball = (Ball) b;
+                StageService stageByLevel = StageService.findStageByLevel(level);
+                //0: Up-Right 1: Down-right 2: Up-Left 3: Down-Left
+                for (int i = 0; i < stageByLevel.getRows(); i++) {
+                    for (int j = 0; j < stageByLevel.getCols(); j++) {
+                        Block block = blocks[i][j];
+                        if (!block.isHidden) {
+                            if (dir == 0) {// 0: Up-Right
+                                if (isCollidedBallAndBar(new Rectangle(ball.x, ball.y, ball.width, ball.height),
+                                        new Rectangle(block.x, block.y, block.width, block.height))) {
+                                    if (ball.x > block.x + BLOCK_GAP &&
+                                            ball.getRightCenter().x <= block.x + block.width - BLOCK_GAP) {
+                                        // block bottom collision
+                                        dir = 1;
+                                    } else {
+                                        // block left collision
+                                        dir = 2;
+                                    }
+                                    block.isHidden = true;
+                                    if (block.color == 0) {
+                                        SCORE += 10;
+                                    } else if (block.color == 1) {
+                                        SCORE += 20;
+                                        balls.add(new Ball(ball.x, ball.y));
+                                        balls.add(new Ball(ball.x, ball.y));
+                                        balls.add(new Ball(ball.x, ball.y));
+                                        movementDupBall();
+                                    }
+                                }
+                            } else if (dir == 1) { // 1: Down-right
+                                if (isCollidedBallAndBar(new Rectangle(ball.x, ball.y, ball.width, ball.height),
+                                        new Rectangle(block.x, block.y, block.width, block.height))) {
+                                    if (ball.x > block.x + BLOCK_GAP &&
+                                            ball.getRightCenter().x <= block.x + block.width - BLOCK_GAP) {
+                                        // block top collision
+                                        dir = 0;
+                                    } else {
+                                        // block left collision
+                                        dir = 2;
+                                    }
+                                    block.isHidden = true;
+                                    if (block.color == 0) {
+                                        SCORE += 10;
+                                    } else if (block.color == 1) {
+                                        SCORE += 20;
+                                        balls.add(new Ball(ball.x, ball.y));
+                                        balls.add(new Ball(ball.x, ball.y));
+                                        balls.add(new Ball(ball.x, ball.y));
+                                        movementDupBall();
+                                    }
+                                }
+                            } else if (dir == 2) { // 2: Up-Left
+                                if (isCollidedBallAndBar(new Rectangle(ball.x, ball.y, ball.width, ball.height),
+                                        new Rectangle(block.x, block.y, block.width, block.height))) {
+                                    if (ball.x > block.x + BLOCK_GAP &&
+                                            ball.getRightCenter().x <= block.x + block.width - BLOCK_GAP) {
+                                        // block bottom collision
+                                        dir = 3;
+                                    } else {
+                                        // block right collision
+                                        dir = 0;
+                                    }
+                                    block.isHidden = true;
+                                    if (block.color == 0) {
+                                        SCORE += 10;
+                                    } else if (block.color == 1) {
+                                        SCORE += 20;
+                                        balls.add(new Ball(ball.x, ball.y));
+                                        balls.add(new Ball(ball.x, ball.y));
+                                        balls.add(new Ball(ball.x, ball.y));
+                                        movementDupBall();
+                                    }
+                                }
+                            } else if (dir == 3) {// 3: Down-Left
+                                if (isCollidedBallAndBar(new Rectangle(ball.x, ball.y, ball.width, ball.height),
+                                        new Rectangle(block.x, block.y, block.width, block.height))) {
+                                    if (ball.x > block.x + BLOCK_GAP &&
+                                            ball.getRightCenter().x <= block.x + block.width - BLOCK_GAP) {
+                                        // block top collision
+                                        dir = 2;
+                                    } else {
+                                        // block right collision
+                                        dir = 1;
+                                    }
+                                    block.isHidden = true;
+                                    if (block.color == 0) {
+                                        SCORE += 10;
+                                    } else if (block.color == 1) {
+                                        SCORE += 20;
+                                        balls.add(new Ball(ball.x, ball.y));
+                                        balls.add(new Ball(ball.x, ball.y));
+                                        balls.add(new Ball(ball.x, ball.y));
+                                        movementDupBall();
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
